@@ -3,6 +3,7 @@ import { Film } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieGrid } from "@/components/MovieGrid";
 import { SearchBar } from "@/components/SearchBar";
+import { Navbar } from "@/components/Navbar";
 import { usePopularMovies, useSearchMovies, getImageUrl } from "@/hooks/useMovies";
 import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-cinema.jpg";
@@ -28,8 +29,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
+      
       {/* Hero Section */}
-      <div className="relative h-[70vh] overflow-hidden">
+      <div className="relative h-[70vh] overflow-hidden mt-16">
         <div
           className="absolute inset-0 bg-cover bg-center scale-110"
           style={{ backgroundImage: `url(${heroImage})` }}
