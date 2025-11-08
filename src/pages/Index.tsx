@@ -4,7 +4,7 @@ import { MovieCard } from "@/components/MovieCard";
 import { MovieGrid } from "@/components/MovieGrid";
 import { SearchBar } from "@/components/SearchBar";
 import { Navbar } from "@/components/Navbar";
-import { usePopularMovies, useSearchMovies, getImageUrl } from "@/hooks/useMovies";
+import { usePopularMovies, useTrendingMovies, useSearchMovies, getImageUrl } from "@/hooks/useMovies";
 import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-cinema.jpg";
 
@@ -13,11 +13,9 @@ const Index = () => {
   const [userRatings, setUserRatings] = useState<Record<number, number>>({});
   const { toast } = useToast();
 
+  const { data: trendingMovies, isLoading: isLoadingTrending } = useTrendingMovies();
   const { data: popularMovies, isLoading: isLoadingPopular } = usePopularMovies();
   const { data: searchResults, isLoading: isSearching } = useSearchMovies(searchQuery);
-
-  const displayMovies = searchQuery ? searchResults?.results : popularMovies?.results;
-  const isLoading = searchQuery ? isSearching : isLoadingPopular;
 
   const handleRate = (movieId: number, rating: number) => {
     setUserRatings((prev) => ({ ...prev, [movieId]: rating }));
@@ -62,43 +60,119 @@ const Index = () => {
       </div>
 
       {/* Movies Section */}
-      <main className="container mx-auto px-4 py-16">
-        <div className="mb-12">
-          <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
-            {searchQuery ? "Search Results" : "Popular Movies"}
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            {searchQuery
-              ? `Found ${displayMovies?.length || 0} results`
-              : "Trending movies right now"}
-          </p>
-        </div>
+      <main className="container mx-auto px-4 py-16 space-y-20">
+        {searchQuery ? (
+          <>
+            <div className="mb-12">
+              <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
+                Search Results
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Found {searchResults?.results?.length || 0} results
+              </p>
+            </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
-          </div>
-        ) : displayMovies && displayMovies.length > 0 ? (
-          <MovieGrid>
-            {displayMovies.map((movie) => (
-              <MovieCard
-                key={movie.id}
-                id={movie.id}
-                title={movie.title}
-                posterPath={getImageUrl(movie.poster_path)}
-                releaseDate={movie.release_date}
-                rating={movie.vote_average}
-                userRating={userRatings[movie.id]}
-                onRate={(rating) => handleRate(movie.id, rating)}
-              />
-            ))}
-          </MovieGrid>
+            {isSearching ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+              </div>
+            ) : searchResults?.results && searchResults.results.length > 0 ? (
+              <MovieGrid>
+                {searchResults.results.map((movie) => (
+                  <MovieCard
+                    key={movie.id}
+                    id={movie.id}
+                    title={movie.title}
+                    posterPath={getImageUrl(movie.poster_path)}
+                    releaseDate={movie.release_date}
+                    rating={movie.vote_average}
+                    userRating={userRatings[movie.id]}
+                    onRate={(rating) => handleRate(movie.id, rating)}
+                  />
+                ))}
+              </MovieGrid>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground text-lg">No movies found</p>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">
-              {searchQuery ? "No movies found" : "No movies available"}
-            </p>
-          </div>
+          <>
+            {/* Trending Section */}
+            <section>
+              <div className="mb-8">
+                <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                  Trending Movies Right Now
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  The hottest movies this week
+                </p>
+              </div>
+
+              {isLoadingTrending ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                </div>
+              ) : trendingMovies?.results && trendingMovies.results.length > 0 ? (
+                <MovieGrid>
+                  {trendingMovies.results.map((movie) => (
+                    <MovieCard
+                      key={movie.id}
+                      id={movie.id}
+                      title={movie.title}
+                      posterPath={getImageUrl(movie.poster_path)}
+                      releaseDate={movie.release_date}
+                      rating={movie.vote_average}
+                      userRating={userRatings[movie.id]}
+                      onRate={(rating) => handleRate(movie.id, rating)}
+                    />
+                  ))}
+                </MovieGrid>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground text-lg">No trending movies available</p>
+                </div>
+              )}
+            </section>
+
+            {/* Popular Section */}
+            <section>
+              <div className="mb-8">
+                <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
+                  Most Popular
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  All-time fan favorites
+                </p>
+              </div>
+
+              {isLoadingPopular ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                </div>
+              ) : popularMovies?.results && popularMovies.results.length > 0 ? (
+                <MovieGrid>
+                  {popularMovies.results.map((movie) => (
+                    <MovieCard
+                      key={movie.id}
+                      id={movie.id}
+                      title={movie.title}
+                      posterPath={getImageUrl(movie.poster_path)}
+                      releaseDate={movie.release_date}
+                      rating={movie.vote_average}
+                      userRating={userRatings[movie.id]}
+                      onRate={(rating) => handleRate(movie.id, rating)}
+                    />
+                  ))}
+                </MovieGrid>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground text-lg">No popular movies available</p>
+                </div>
+              )}
+            </section>
+          </>
         )}
       </main>
     </div>
