@@ -33,32 +33,35 @@ export const MovieCard = ({
 
   return (
     <Card
-      className="group relative overflow-hidden bg-card border-border hover:border-primary transition-all duration-300 cursor-pointer hover:shadow-glow"
+      className="group relative overflow-hidden bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 cursor-pointer hover:shadow-elevated hover:-translate-y-2"
       onClick={onClick}
     >
       <div className="aspect-[2/3] relative overflow-hidden">
         <img
           src={posterPath}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        
+        {/* Shimmer effect on hover */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-5 space-y-3 bg-gradient-glass backdrop-blur-md border-t border-border/30">
         <div>
-          <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors duration-300 text-lg">
             {title}
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mt-1">
             {new Date(releaseDate).getFullYear()}
           </p>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Star className="w-4 h-4 fill-accent text-accent" />
-            <span>{rating.toFixed(1)}</span>
+            <span className="font-medium">{rating.toFixed(1)}</span>
           </div>
 
           <div 
@@ -71,15 +74,15 @@ export const MovieCard = ({
                 onMouseEnter={() => setHoveredStar(star)}
                 onMouseLeave={() => setHoveredStar(null)}
                 onClick={() => handleStarClick(star)}
-                className="transition-transform hover:scale-110"
+                className="transition-all duration-200 hover:scale-125 active:scale-95"
               >
                 <Star
                   className={cn(
-                    "w-4 h-4 transition-colors",
+                    "w-4 h-4 transition-all duration-200",
                     (hoveredStar !== null && star <= hoveredStar) ||
                     (hoveredStar === null && userRating && star <= userRating)
-                      ? "fill-accent text-accent"
-                      : "text-muted-foreground"
+                      ? "fill-accent text-accent drop-shadow-[0_0_8px_rgba(234,179,8,0.6)]"
+                      : "text-muted-foreground/50 hover:text-muted-foreground"
                   )}
                 />
               </button>

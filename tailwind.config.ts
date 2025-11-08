@@ -51,13 +51,19 @@ export default {
       backgroundImage: {
         'gradient-hero': 'var(--gradient-hero)',
         'gradient-card': 'var(--gradient-card)',
+        'gradient-glass': 'var(--gradient-glass)',
       },
       boxShadow: {
         'glow': 'var(--shadow-glow)',
         'card': 'var(--shadow-card)',
+        'elevated': 'var(--shadow-elevated)',
       },
       transitionProperty: {
         'smooth': 'var(--transition-smooth)',
+        'bounce': 'var(--transition-bounce)',
+      },
+      backdropBlur: {
+        'xs': '2px',
       },
       borderRadius: {
         lg: "var(--radius)",

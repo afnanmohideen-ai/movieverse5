@@ -29,26 +29,26 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative h-[60vh] overflow-hidden">
+      <div className="relative h-[70vh] overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center scale-110"
           style={{ backgroundImage: `url(${heroImage})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background" />
         </div>
 
-        <div className="relative container mx-auto px-4 h-full flex flex-col items-center justify-center text-center space-y-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Film className="w-12 h-12 text-primary" />
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground">
+        <div className="relative container mx-auto px-4 h-full flex flex-col items-center justify-center text-center space-y-8">
+          <div className="flex items-center gap-4 mb-2 animate-fade-in">
+            <Film className="w-14 h-14 text-primary drop-shadow-[0_0_20px_rgba(79,156,255,0.5)]" />
+            <h1 className="text-6xl md:text-8xl font-bold text-foreground tracking-tight bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text">
               Movieverse
             </h1>
           </div>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
+          <p className="text-xl md:text-3xl text-muted-foreground max-w-3xl font-light animate-fade-in">
             Discover, rate, and track your favorite films
           </p>
 
-          <div className="w-full max-w-2xl mt-8">
+          <div className="w-full max-w-2xl mt-12">
             <SearchBar
               value={searchQuery}
               onChange={setSearchQuery}
@@ -59,12 +59,12 @@ const Index = () => {
       </div>
 
       {/* Movies Section */}
-      <main className="container mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-2">
+      <main className="container mx-auto px-4 py-16">
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
             {searchQuery ? "Search Results" : "Popular Movies"}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             {searchQuery
               ? `Found ${displayMovies?.length || 0} results`
               : "Trending movies right now"}
