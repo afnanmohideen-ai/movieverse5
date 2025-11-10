@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { Star, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useWatchlist } from "@/hooks/useWatchlist";
+import { useToast } from "@/hooks/use-toast";
 
 interface MovieCardProps {
   id: number;
@@ -10,32 +14,58 @@ interface MovieCardProps {
   releaseDate: string;
   rating: number;
   userRating?: number;
-  onRate?: (rating: number) => void;
-  onClick?: () => void;
+  onRate: (rating: number) => void;
 }
 
 export const MovieCard = ({
+  id,
   title,
   posterPath,
   releaseDate,
   rating,
   userRating,
   onRate,
-  onClick,
 }: MovieCardProps) => {
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { toast } = useToast();
+  const isInList = isInWatchlist(id);
 
-  const handleStarClick = (starRating: number) => {
-    if (onRate) {
-      onRate(starRating);
-    }
+  const handleWatchlistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleWatchlist(id);
+    toast({
+      title: isInList ? "Removed from watchlist" : "Added to watchlist",
+      description: isInList
+        ? `${title} removed from your watchlist`
+        : `${title} added to your watchlist`,
+    });
+  };
+
+  const handleCardClick = () => {
+    navigate(`/movie/${id}`);
+  };
+
+  const handleStarClick = (e: React.MouseEvent, starRating: number) => {
+    e.stopPropagation();
+    onRate(starRating);
   };
 
   return (
     <Card
       className="group relative overflow-hidden bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 cursor-pointer hover:shadow-elevated hover:-translate-y-2"
-      onClick={onClick}
+      onClick={handleCardClick}
     >
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2 right-2 z-10 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+        onClick={handleWatchlistClick}
+      >
+        <Heart className={`w-4 h-4 ${isInList ? "fill-primary text-primary" : ""}`} />
+      </Button>
+
       <div className="aspect-[2/3] relative overflow-hidden">
         <img
           src={posterPath}
@@ -64,16 +94,13 @@ export const MovieCard = ({
             <span className="font-medium">{rating.toFixed(1)}</span>
           </div>
 
-          <div 
-            className="flex gap-1"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 onMouseEnter={() => setHoveredStar(star)}
                 onMouseLeave={() => setHoveredStar(null)}
-                onClick={() => handleStarClick(star)}
+                onClick={(e) => handleStarClick(e, star)}
                 className="transition-all duration-200 hover:scale-125 active:scale-95"
               >
                 <Star

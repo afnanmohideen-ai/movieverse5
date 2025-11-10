@@ -4,18 +4,42 @@ import { MovieCard } from "@/components/MovieCard";
 import { MovieGrid } from "@/components/MovieGrid";
 import { SearchBar } from "@/components/SearchBar";
 import { Navbar } from "@/components/Navbar";
-import { usePopularMovies, useTrendingMovies, useSearchMovies, getImageUrl } from "@/hooks/useMovies";
+import { FilterBar } from "@/components/FilterBar";
+import { MoviePagination } from "@/components/MoviePagination";
+import { 
+  usePopularMovies, 
+  useTrendingMovies, 
+  useSearchMovies, 
+  useUpcomingMovies,
+  useFilteredMovies,
+  getImageUrl 
+} from "@/hooks/useMovies";
 import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-cinema.jpg";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [userRatings, setUserRatings] = useState<Record<number, number>>({});
+  const [selectedGenre, setSelectedGenre] = useState<number>();
+  const [selectedYear, setSelectedYear] = useState<number>();
+  const [trendingPage, setTrendingPage] = useState(1);
+  const [popularPage, setPopularPage] = useState(1);
+  const [upcomingPage, setUpcomingPage] = useState(1);
+  const [searchPage, setSearchPage] = useState(1);
+  const [filteredPage, setFilteredPage] = useState(1);
   const { toast } = useToast();
 
-  const { data: trendingMovies, isLoading: isLoadingTrending } = useTrendingMovies();
-  const { data: popularMovies, isLoading: isLoadingPopular } = usePopularMovies();
-  const { data: searchResults, isLoading: isSearching } = useSearchMovies(searchQuery);
+  const hasFilters = selectedGenre || selectedYear;
+
+  const { data: trendingMovies, isLoading: isLoadingTrending } = useTrendingMovies(trendingPage);
+  const { data: popularMovies, isLoading: isLoadingPopular } = usePopularMovies(popularPage);
+  const { data: upcomingMovies, isLoading: isLoadingUpcoming } = useUpcomingMovies(upcomingPage);
+  const { data: searchResults, isLoading: isSearching } = useSearchMovies(searchQuery, searchPage);
+  const { data: filteredMovies, isLoading: isLoadingFiltered } = useFilteredMovies(
+    filteredPage,
+    selectedGenre,
+    selectedYear
+  );
 
   const handleRate = (movieId: number, rating: number) => {
     setUserRatings((prev) => ({ ...prev, [movieId]: rating }));
@@ -23,6 +47,12 @@ const Index = () => {
       title: "Rating saved!",
       description: `You rated this movie ${rating} stars`,
     });
+  };
+
+  const handleClearFilters = () => {
+    setSelectedGenre(undefined);
+    setSelectedYear(undefined);
+    setFilteredPage(1);
   };
 
   return (
@@ -61,6 +91,22 @@ const Index = () => {
 
       {/* Movies Section */}
       <main className="container mx-auto px-4 py-16 space-y-20">
+        {!searchQuery && (
+          <FilterBar
+            selectedGenre={selectedGenre}
+            selectedYear={selectedYear}
+            onGenreChange={(genre) => {
+              setSelectedGenre(genre);
+              setFilteredPage(1);
+            }}
+            onYearChange={(year) => {
+              setSelectedYear(year);
+              setFilteredPage(1);
+            }}
+            onClearFilters={handleClearFilters}
+          />
+        )}
+
         {searchQuery ? (
           <>
             <div className="mb-12">
@@ -96,7 +142,61 @@ const Index = () => {
                 <p className="text-muted-foreground text-lg">No movies found</p>
               </div>
             )}
+
+            {searchResults && searchResults.total_pages > 1 && (
+              <MoviePagination
+                currentPage={searchPage}
+                totalPages={searchResults.total_pages}
+                onPageChange={setSearchPage}
+              />
+            )}
           </>
+        ) : hasFilters ? (
+          <section>
+            <div className="mb-8">
+              <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
+                Filtered Results
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Movies matching your filters
+              </p>
+            </div>
+
+            {isLoadingFiltered ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+              </div>
+            ) : filteredMovies?.results && filteredMovies.results.length > 0 ? (
+              <>
+                <MovieGrid>
+                  {filteredMovies.results.map((movie) => (
+                    <MovieCard
+                      key={movie.id}
+                      id={movie.id}
+                      title={movie.title}
+                      posterPath={getImageUrl(movie.poster_path)}
+                      releaseDate={movie.release_date}
+                      rating={movie.vote_average}
+                      userRating={userRatings[movie.id]}
+                      onRate={(rating) => handleRate(movie.id, rating)}
+                    />
+                  ))}
+                </MovieGrid>
+
+                {filteredMovies.total_pages > 1 && (
+                  <MoviePagination
+                    currentPage={filteredPage}
+                    totalPages={filteredMovies.total_pages}
+                    onPageChange={setFilteredPage}
+                  />
+                )}
+              </>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground text-lg">No movies found with these filters</p>
+              </div>
+            )}
+          </section>
         ) : (
           <>
             {/* Trending Section */}
@@ -134,6 +234,14 @@ const Index = () => {
                   <p className="text-muted-foreground text-lg">No trending movies available</p>
                 </div>
               )}
+
+              {trendingMovies && trendingMovies.total_pages > 1 && (
+                <MoviePagination
+                  currentPage={trendingPage}
+                  totalPages={trendingMovies.total_pages}
+                  onPageChange={setTrendingPage}
+                />
+              )}
             </section>
 
             {/* Popular Section */}
@@ -169,6 +277,61 @@ const Index = () => {
               ) : (
                 <div className="text-center py-20">
                   <p className="text-muted-foreground text-lg">No popular movies available</p>
+                </div>
+              )}
+
+              {popularMovies && popularMovies.total_pages > 1 && (
+                <MoviePagination
+                  currentPage={popularPage}
+                  totalPages={popularMovies.total_pages}
+                  onPageChange={setPopularPage}
+                />
+              )}
+            </section>
+
+            {/* Upcoming Section */}
+            <section>
+              <div className="mb-8">
+                <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
+                  Coming Soon
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Upcoming releases in the next 2 years
+                </p>
+              </div>
+
+              {isLoadingUpcoming ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                </div>
+              ) : upcomingMovies?.results && upcomingMovies.results.length > 0 ? (
+                <>
+                  <MovieGrid>
+                    {upcomingMovies.results.map((movie) => (
+                      <MovieCard
+                        key={movie.id}
+                        id={movie.id}
+                        title={movie.title}
+                        posterPath={getImageUrl(movie.poster_path)}
+                        releaseDate={movie.release_date}
+                        rating={movie.vote_average}
+                        userRating={userRatings[movie.id]}
+                        onRate={(rating) => handleRate(movie.id, rating)}
+                      />
+                    ))}
+                  </MovieGrid>
+
+                  {upcomingMovies.total_pages > 1 && (
+                    <MoviePagination
+                      currentPage={upcomingPage}
+                      totalPages={upcomingMovies.total_pages}
+                      onPageChange={setUpcomingPage}
+                    />
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground text-lg">No upcoming movies available</p>
                 </div>
               )}
             </section>
