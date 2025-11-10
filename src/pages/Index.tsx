@@ -55,6 +55,20 @@ const Index = () => {
     setFilteredPage(1);
   };
 
+  // Filter out unreleased movies (only show released movies)
+  const filterReleasedMovies = (movies: typeof trendingMovies) => {
+    if (!movies?.results) return movies;
+    const today = new Date().toISOString().split('T')[0];
+    return {
+      ...movies,
+      results: movies.results.filter(movie => movie.release_date && movie.release_date <= today)
+    };
+  };
+
+  const releasedTrendingMovies = filterReleasedMovies(trendingMovies);
+  const releasedPopularMovies = filterReleasedMovies(popularMovies);
+  const releasedFilteredMovies = filterReleasedMovies(filteredMovies);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -166,10 +180,10 @@ const Index = () => {
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
               </div>
-            ) : filteredMovies?.results && filteredMovies.results.length > 0 ? (
+            ) : releasedFilteredMovies?.results && releasedFilteredMovies.results.length > 0 ? (
               <>
                 <MovieGrid>
-                  {filteredMovies.results.map((movie) => (
+                  {releasedFilteredMovies.results.map((movie) => (
                     <MovieCard
                       key={movie.id}
                       id={movie.id}
@@ -214,9 +228,9 @@ const Index = () => {
                 <div className="flex items-center justify-center py-20">
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
                 </div>
-              ) : trendingMovies?.results && trendingMovies.results.length > 0 ? (
+              ) : releasedTrendingMovies?.results && releasedTrendingMovies.results.length > 0 ? (
                 <MovieGrid>
-                  {trendingMovies.results.map((movie) => (
+                  {releasedTrendingMovies.results.map((movie) => (
                     <MovieCard
                       key={movie.id}
                       id={movie.id}
@@ -259,9 +273,9 @@ const Index = () => {
                 <div className="flex items-center justify-center py-20">
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
                 </div>
-              ) : popularMovies?.results && popularMovies.results.length > 0 ? (
+              ) : releasedPopularMovies?.results && releasedPopularMovies.results.length > 0 ? (
                 <MovieGrid>
-                  {popularMovies.results.map((movie) => (
+                  {releasedPopularMovies.results.map((movie) => (
                     <MovieCard
                       key={movie.id}
                       id={movie.id}
