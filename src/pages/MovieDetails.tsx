@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Star, Clock, Heart } from "lucide-react";
+import { ArrowLeft, Calendar, Star, Clock, Heart, Play, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { useMovieDetails, useWatchProviders, getImageUrl } from "@/hooks/useMovies";
+import { useMovieDetails, useWatchProviders, useMovieVideos, useMovieReviews, getImageUrl } from "@/hooks/useMovies";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,9 +16,12 @@ const MovieDetails = () => {
   
   const { data: movie, isLoading } = useMovieDetails(movieId);
   const { data: watchProvidersData } = useWatchProviders(movieId);
+  const { data: videos } = useMovieVideos(movieId);
+  const { data: reviews } = useMovieReviews(movieId);
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
 
   const watchProviders = watchProvidersData?.results?.US;
+  const trailers = videos?.filter(v => v.type === "Trailer" && v.site === "YouTube") || [];
   const isInList = isInWatchlist(movieId);
 
   const handleWatchlistToggle = () => {
@@ -243,6 +247,97 @@ const MovieDetails = () => {
             )}
           </div>
         </div>
+
+        {/* Trailers Section */}
+        {trailers && trailers.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-6">Trailers & Videos</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {trailers.slice(0, 4).map((video) => (
+                <div key={video.id} className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden">
+                  <div className="relative aspect-video">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${video.key}`}
+                      title={video.name}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 text-primary">
+                      <Play className="w-4 h-4" />
+                      <p className="font-semibold">{video.name}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Reviews Section */}
+        {reviews && reviews.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-6">Reviews</h2>
+            <div className="space-y-6">
+              {reviews.slice(0, 5).map((review) => (
+                <Card key={review.id} className="bg-card/50 backdrop-blur-xl border-border/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="flex items-center gap-2">
+                        {review.author_details.avatar_path ? (
+                          <img
+                            src={
+                              review.author_details.avatar_path.startsWith('/https')
+                                ? review.author_details.avatar_path.substring(1)
+                                : getImageUrl(review.author_details.avatar_path)
+                            }
+                            alt={review.author}
+                            className="w-12 h-12 rounded-full"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                            <User className="w-6 h-6 text-primary" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-bold text-lg">{review.author}</h3>
+                          {review.author_details.rating && (
+                            <div className="flex items-center gap-1 bg-primary/20 px-3 py-1 rounded-full">
+                              <Star className="w-4 h-4 fill-primary text-primary" />
+                              <span className="font-semibold">{review.author_details.rating}/10</span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {new Date(review.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                        <p className="text-foreground leading-relaxed line-clamp-6">
+                          {review.content}
+                        </p>
+                        <a
+                          href={review.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline text-sm mt-2 inline-block"
+                        >
+                          Read full review →
+                        </a>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

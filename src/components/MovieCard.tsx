@@ -14,7 +14,7 @@ interface MovieCardProps {
   releaseDate: string;
   rating: number;
   userRating?: number;
-  onRate: (rating: number) => void;
+  onRate?: (rating: number) => void;
 }
 
 export const MovieCard = ({
@@ -49,7 +49,7 @@ export const MovieCard = ({
 
   const handleStarClick = (e: React.MouseEvent, starRating: number) => {
     e.stopPropagation();
-    onRate(starRating);
+    onRate?.(starRating);
   };
 
   return (

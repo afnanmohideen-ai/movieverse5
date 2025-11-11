@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Film } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieGrid } from "@/components/MovieGrid";
+import { TVShowCard } from "@/components/TVShowCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Navbar } from "@/components/Navbar";
 import { FilterBar } from "@/components/FilterBar";
 import { MoviePagination } from "@/components/MoviePagination";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   usePopularMovies, 
   useTrendingMovies, 
@@ -14,6 +16,12 @@ import {
   useFilteredMovies,
   getImageUrl 
 } from "@/hooks/useMovies";
+import { 
+  usePopularTVShows, 
+  useTrendingTVShows, 
+  useSearchTVShows, 
+  useUpcomingTVShows 
+} from "@/hooks/useTVShows";
 import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-cinema.jpg";
 
@@ -22,6 +30,7 @@ const Index = () => {
   const [userRatings, setUserRatings] = useState<Record<number, number>>({});
   const [selectedGenre, setSelectedGenre] = useState<number>();
   const [selectedYear, setSelectedYear] = useState<number>();
+  const [activeTab, setActiveTab] = useState("movies");
   const [trendingPage, setTrendingPage] = useState(1);
   const [popularPage, setPopularPage] = useState(1);
   const [upcomingPage, setUpcomingPage] = useState(1);
@@ -31,6 +40,7 @@ const Index = () => {
 
   const hasFilters = selectedGenre || selectedYear;
 
+  // Movie hooks
   const { data: trendingMovies, isLoading: isLoadingTrending } = useTrendingMovies(trendingPage);
   const { data: popularMovies, isLoading: isLoadingPopular } = usePopularMovies(popularPage);
   const { data: upcomingMovies, isLoading: isLoadingUpcoming } = useUpcomingMovies(upcomingPage);
@@ -40,6 +50,12 @@ const Index = () => {
     selectedGenre,
     selectedYear
   );
+
+  // TV Show hooks
+  const { data: trendingTVShows, isLoading: isLoadingTrendingTV } = useTrendingTVShows(trendingPage);
+  const { data: popularTVShows, isLoading: isLoadingPopularTV } = usePopularTVShows(popularPage);
+  const { data: upcomingTVShows, isLoading: isLoadingUpcomingTV } = useUpcomingTVShows(upcomingPage);
+  const { data: searchTVResults, isLoading: isSearchingTV } = useSearchTVShows(searchQuery, searchPage);
 
   const handleRate = (movieId: number, rating: number) => {
     setUserRatings((prev) => ({ ...prev, [movieId]: rating }));
@@ -97,14 +113,22 @@ const Index = () => {
             <SearchBar
               value={searchQuery}
               onChange={setSearchQuery}
-              placeholder="Search for movies..."
+              placeholder={`Search for ${activeTab === "movies" ? "movies" : "TV shows"}...`}
             />
           </div>
         </div>
       </div>
 
-      {/* Movies Section */}
-      <main className="container mx-auto px-4 py-16 space-y-20">
+      {/* Content Section with Tabs */}
+      <main className="container mx-auto px-4 py-16">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+            <TabsTrigger value="movies">Movies</TabsTrigger>
+            <TabsTrigger value="tvshows">TV Shows</TabsTrigger>
+          </TabsList>
+
+          {/* MOVIES TAB */}
+          <TabsContent value="movies" className="space-y-20">
         {!searchQuery && (
           <FilterBar
             selectedGenre={selectedGenre}
@@ -351,6 +375,169 @@ const Index = () => {
             </section>
           </>
         )}
+          </TabsContent>
+
+          {/* TV SHOWS TAB */}
+          <TabsContent value="tvshows" className="space-y-20">
+            {searchQuery ? (
+              <>
+                <div className="mb-12">
+                  <h2 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
+                    Search Results
+                  </h2>
+                  <p className="text-lg text-muted-foreground">
+                    Found {searchTVResults?.results?.length || 0} results
+                  </p>
+                </div>
+
+                {isSearchingTV ? (
+                  <div className="flex items-center justify-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                  </div>
+                ) : searchTVResults?.results && searchTVResults.results.length > 0 ? (
+                  <MovieGrid>
+                    {searchTVResults.results.map((show) => (
+                      <TVShowCard
+                        key={show.id}
+                        id={show.id}
+                        name={show.name}
+                        posterPath={show.poster_path}
+                        firstAirDate={show.first_air_date}
+                        rating={show.vote_average}
+                      />
+                    ))}
+                  </MovieGrid>
+                ) : (
+                  <div className="text-center py-20">
+                    <p className="text-muted-foreground text-lg">No TV shows found</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Trending TV Shows */}
+                <section>
+                  <h2 className="text-4xl font-bold text-foreground mb-8 tracking-tight">
+                    Trending TV Shows
+                  </h2>
+                  
+                  {isLoadingTrendingTV ? (
+                    <div className="flex items-center justify-center py-20">
+                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                    </div>
+                  ) : trendingTVShows?.results && trendingTVShows.results.length > 0 ? (
+                    <>
+                      <MovieGrid>
+                        {trendingTVShows.results.map((show) => (
+                          <TVShowCard
+                            key={show.id}
+                            id={show.id}
+                            name={show.name}
+                            posterPath={show.poster_path}
+                            firstAirDate={show.first_air_date}
+                            rating={show.vote_average}
+                          />
+                        ))}
+                      </MovieGrid>
+
+                      {trendingTVShows.total_pages > 1 && (
+                        <MoviePagination
+                          currentPage={trendingPage}
+                          totalPages={trendingTVShows.total_pages}
+                          onPageChange={setTrendingPage}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-20">
+                      <p className="text-muted-foreground text-lg">No trending TV shows available</p>
+                    </div>
+                  )}
+                </section>
+
+                {/* Popular TV Shows */}
+                <section>
+                  <h2 className="text-4xl font-bold text-foreground mb-8 tracking-tight">
+                    Most Popular TV Shows
+                  </h2>
+                  
+                  {isLoadingPopularTV ? (
+                    <div className="flex items-center justify-center py-20">
+                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                    </div>
+                  ) : popularTVShows?.results && popularTVShows.results.length > 0 ? (
+                    <>
+                      <MovieGrid>
+                        {popularTVShows.results.map((show) => (
+                          <TVShowCard
+                            key={show.id}
+                            id={show.id}
+                            name={show.name}
+                            posterPath={show.poster_path}
+                            firstAirDate={show.first_air_date}
+                            rating={show.vote_average}
+                          />
+                        ))}
+                      </MovieGrid>
+
+                      {popularTVShows.total_pages > 1 && (
+                        <MoviePagination
+                          currentPage={popularPage}
+                          totalPages={popularTVShows.total_pages}
+                          onPageChange={setPopularPage}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-20">
+                      <p className="text-muted-foreground text-lg">No popular TV shows available</p>
+                    </div>
+                  )}
+                </section>
+
+                {/* Coming Soon TV Shows */}
+                <section>
+                  <h2 className="text-4xl font-bold text-foreground mb-8 tracking-tight">
+                    Coming Soon TV Shows
+                  </h2>
+                  
+                  {isLoadingUpcomingTV ? (
+                    <div className="flex items-center justify-center py-20">
+                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                    </div>
+                  ) : upcomingTVShows?.results && upcomingTVShows.results.length > 0 ? (
+                    <>
+                      <MovieGrid>
+                        {upcomingTVShows.results.map((show) => (
+                          <TVShowCard
+                            key={show.id}
+                            id={show.id}
+                            name={show.name}
+                            posterPath={show.poster_path}
+                            firstAirDate={show.first_air_date}
+                            rating={show.vote_average}
+                          />
+                        ))}
+                      </MovieGrid>
+
+                      {upcomingTVShows.total_pages > 1 && (
+                        <MoviePagination
+                          currentPage={upcomingPage}
+                          totalPages={upcomingTVShows.total_pages}
+                          onPageChange={setUpcomingPage}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-20">
+                      <p className="text-muted-foreground text-lg">No upcoming TV shows available</p>
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

@@ -157,6 +157,56 @@ export const useWatchProviders = (movieId: number) => {
   });
 };
 
+export const useMovieVideos = (movieId: number) => {
+  return useQuery({
+    queryKey: ["movieVideos", movieId],
+    queryFn: async () => {
+      const response = await fetch(
+        `${TMDB_BASE_URL}/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=en-US`
+      );
+      if (!response.ok) throw new Error("Failed to fetch movie videos");
+      const data = await response.json();
+      return data.results as Array<{
+        id: string;
+        key: string;
+        name: string;
+        site: string;
+        type: string;
+        official: boolean;
+      }>;
+    },
+    enabled: !!movieId,
+  });
+};
+
+export const useMovieReviews = (movieId: number) => {
+  return useQuery({
+    queryKey: ["movieReviews", movieId],
+    queryFn: async () => {
+      const response = await fetch(
+        `${TMDB_BASE_URL}/movie/${movieId}/reviews?api_key=${TMDB_API_KEY}&language=en-US&page=1`
+      );
+      if (!response.ok) throw new Error("Failed to fetch movie reviews");
+      const data = await response.json();
+      return data.results as Array<{
+        author: string;
+        author_details: {
+          name: string;
+          username: string;
+          avatar_path: string | null;
+          rating: number | null;
+        };
+        content: string;
+        created_at: string;
+        id: string;
+        updated_at: string;
+        url: string;
+      }>;
+    },
+    enabled: !!movieId,
+  });
+};
+
 export const getImageUrl = (path: string, size: "w500" | "original" = "w500") => {
   if (!path) return "/placeholder.svg";
   return `https://image.tmdb.org/t/p/${size}${path}`;
