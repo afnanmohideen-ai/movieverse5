@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Star, Heart } from "lucide-react";
+import { Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
 
 interface TVShowCardProps {
   id: number;
@@ -20,16 +19,20 @@ export const TVShowCard = ({
   firstAirDate,
   rating,
 }: TVShowCardProps) => {
-  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const imageUrl = posterPath 
     ? `https://image.tmdb.org/t/p/w500${posterPath}`
     : "/placeholder.svg";
 
+  const handleCardClick = () => {
+    navigate(`/tv/${id}`);
+  };
+
   return (
     <Card
       className="group relative overflow-hidden bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 cursor-pointer hover:shadow-elevated hover:-translate-y-2"
+      onClick={handleCardClick}
     >
       <div className="aspect-[2/3] relative overflow-hidden">
         <img

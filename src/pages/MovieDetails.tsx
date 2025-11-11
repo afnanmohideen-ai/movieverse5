@@ -105,9 +105,37 @@ const MovieDetails = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2 bg-primary/20 px-4 py-2 rounded-full">
-                <Star className="w-5 h-5 fill-primary text-primary" />
-                <span className="font-bold text-lg">{movie.vote_average.toFixed(1)}</span>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 bg-primary/20 px-4 py-2 rounded-full">
+                    <Star className="w-5 h-5 fill-primary text-primary" />
+                    <div className="flex flex-col">
+                      <span className="font-bold text-lg">{movie.vote_average.toFixed(1)}</span>
+                      <span className="text-xs text-muted-foreground">TMDB</span>
+                    </div>
+                  </div>
+
+                  {movie.imdb_id && (
+                    <a
+                      href={`https://www.imdb.com/title/${movie.imdb_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 bg-accent/20 px-4 py-2 rounded-full hover:bg-accent/30 transition-colors"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-bold text-lg text-accent">{movie.vote_average.toFixed(1)}</span>
+                        <span className="text-xs text-muted-foreground">IMDb</span>
+                      </div>
+                    </a>
+                  )}
+
+                  <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-full">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-lg">{movie.vote_count?.toLocaleString() || '0'}</span>
+                      <span className="text-xs text-muted-foreground">Votes</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {movie.release_date && (

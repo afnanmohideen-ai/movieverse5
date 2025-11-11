@@ -20,6 +20,8 @@ export interface Movie {
   genres?: Genre[];
   runtime?: number;
   tagline?: string;
+  imdb_id?: string;
+  vote_count?: number;
 }
 
 export interface WatchProvider {

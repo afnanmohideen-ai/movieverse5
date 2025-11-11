@@ -1,5 +1,5 @@
 import { useWatchlist } from "@/hooks/useWatchlist";
-import { useMovieDetails } from "@/hooks/useMovies";
+import { useMovieDetails, getImageUrl } from "@/hooks/useMovies";
 import { Navbar } from "@/components/Navbar";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieGrid } from "@/components/MovieGrid";
@@ -21,7 +21,7 @@ const WatchlistMovieCard = ({ movieId }: { movieId: number }) => {
     <MovieCard
       id={movie.id}
       title={movie.title}
-      posterPath={movie.poster_path}
+      posterPath={getImageUrl(movie.poster_path)}
       releaseDate={movie.release_date}
       rating={movie.vote_average}
     />
