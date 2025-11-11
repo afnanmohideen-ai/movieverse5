@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Film } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieGrid } from "@/components/MovieGrid";
 import { TVShowCard } from "@/components/TVShowCard";
@@ -7,7 +8,6 @@ import { SearchBar } from "@/components/SearchBar";
 import { Navbar } from "@/components/Navbar";
 import { FilterBar } from "@/components/FilterBar";
 import { MoviePagination } from "@/components/MoviePagination";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   usePopularMovies, 
   useTrendingMovies, 
