@@ -147,3 +147,32 @@ export const useTVShowWatchProviders = (tvShowId: number) => {
     enabled: !!tvShowId,
   });
 };
+
+export interface TVShowReview {
+  id: string;
+  author: string;
+  author_details: {
+    name: string;
+    username: string;
+    avatar_path: string | null;
+    rating: number | null;
+  };
+  content: string;
+  created_at: string;
+  url: string;
+}
+
+export const useTVShowReviews = (tvShowId: number) => {
+  return useQuery({
+    queryKey: ["tvShowReviews", tvShowId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${BASE_URL}/tv/${tvShowId}/reviews?api_key=${API_KEY}&language=en-US&page=1`
+      );
+      if (!res.ok) throw new Error("Failed to fetch TV show reviews");
+      const data = await res.json();
+      return data.results as TVShowReview[];
+    },
+    enabled: !!tvShowId,
+  });
+};

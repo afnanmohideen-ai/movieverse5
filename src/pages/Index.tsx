@@ -28,6 +28,7 @@ import heroImage from "@/assets/hero-cinema.jpg";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [userRatings, setUserRatings] = useState<Record<number, number>>({});
+  const [tvUserRatings, setTvUserRatings] = useState<Record<number, number>>({});
   const [selectedGenre, setSelectedGenre] = useState<number>();
   const [selectedYear, setSelectedYear] = useState<number>();
   const [activeTab, setActiveTab] = useState("movies");
@@ -62,6 +63,14 @@ const Index = () => {
     toast({
       title: "Rating saved!",
       description: `You rated this movie ${rating} stars`,
+    });
+  };
+
+  const handleRateTV = (tvShowId: number, rating: number) => {
+    setTvUserRatings((prev) => ({ ...prev, [tvShowId]: rating }));
+    toast({
+      title: "Rating saved!",
+      description: `You rated this TV show ${rating} stars`,
     });
   };
 
@@ -404,6 +413,8 @@ const Index = () => {
                         posterPath={show.poster_path}
                         firstAirDate={show.first_air_date}
                         rating={show.vote_average}
+                        userRating={tvUserRatings[show.id]}
+                        onRate={(rating) => handleRateTV(show.id, rating)}
                       />
                     ))}
                   </MovieGrid>
@@ -436,6 +447,8 @@ const Index = () => {
                             posterPath={show.poster_path}
                             firstAirDate={show.first_air_date}
                             rating={show.vote_average}
+                            userRating={tvUserRatings[show.id]}
+                            onRate={(rating) => handleRateTV(show.id, rating)}
                           />
                         ))}
                       </MovieGrid>
@@ -476,6 +489,8 @@ const Index = () => {
                             posterPath={show.poster_path}
                             firstAirDate={show.first_air_date}
                             rating={show.vote_average}
+                            userRating={tvUserRatings[show.id]}
+                            onRate={(rating) => handleRateTV(show.id, rating)}
                           />
                         ))}
                       </MovieGrid>
@@ -516,6 +531,8 @@ const Index = () => {
                             posterPath={show.poster_path}
                             firstAirDate={show.first_air_date}
                             rating={show.vote_average}
+                            userRating={tvUserRatings[show.id]}
+                            onRate={(rating) => handleRateTV(show.id, rating)}
                           />
                         ))}
                       </MovieGrid>

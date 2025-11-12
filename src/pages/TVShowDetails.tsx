@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Star, Play, User } from "lucide-react";
+import { ArrowLeft, Calendar, Star, Play, User, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { useTVShowDetails, useTVShowVideos, useTVShowWatchProviders } from "@/hooks/useTVShows";
+import { useTVShowDetails, useTVShowVideos, useTVShowWatchProviders, useTVShowReviews } from "@/hooks/useTVShows";
 import { getImageUrl } from "@/hooks/useMovies";
 
 const TVShowDetails = () => {
@@ -15,6 +15,7 @@ const TVShowDetails = () => {
   const { data: tvShow, isLoading } = useTVShowDetails(tvShowId);
   const { data: videos } = useTVShowVideos(tvShowId);
   const { data: watchProvidersData } = useTVShowWatchProviders(tvShowId);
+  const { data: reviews } = useTVShowReviews(tvShowId);
 
   const watchProviders = watchProvidersData?.results?.US;
   const trailers = videos?.filter(v => v.type === "Trailer" && v.site === "YouTube") || [];
@@ -199,6 +200,67 @@ const TVShowDetails = () => {
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Reviews Section */}
+        {reviews && reviews.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-6">User Reviews</h2>
+            <div className="space-y-6">
+              {reviews.slice(0, 5).map((review) => (
+                <Card key={review.id} className="bg-card/50 backdrop-blur-xl border border-border/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="flex-shrink-0">
+                        {review.author_details.avatar_path ? (
+                          <img
+                            src={
+                              review.author_details.avatar_path.startsWith("/https")
+                                ? review.author_details.avatar_path.slice(1)
+                                : getImageUrl(review.author_details.avatar_path)
+                            }
+                            alt={review.author}
+                            className="w-12 h-12 rounded-full"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                            <User className="w-6 h-6 text-primary" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-lg">{review.author}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(review.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          {review.author_details.rating && (
+                            <div className="flex items-center gap-1 bg-primary/20 px-3 py-1 rounded-full">
+                              <Star className="w-4 h-4 fill-primary text-primary" />
+                              <span className="font-semibold">{review.author_details.rating}/10</span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed line-clamp-6">
+                          {review.content}
+                        </p>
+                        <a
+                          href={review.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-primary hover:underline mt-2 text-sm"
+                        >
+                          Read full review <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>

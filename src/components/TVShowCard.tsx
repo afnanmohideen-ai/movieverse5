@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { Star, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useWatchlist } from "@/hooks/useWatchlist";
+import { useToast } from "@/hooks/use-toast";
 
 interface TVShowCardProps {
   id: number;
@@ -10,6 +13,8 @@ interface TVShowCardProps {
   posterPath: string;
   firstAirDate: string;
   rating: number;
+  userRating?: number;
+  onRate?: (rating: number) => void;
 }
 
 export const TVShowCard = ({
@@ -18,15 +23,37 @@ export const TVShowCard = ({
   posterPath,
   firstAirDate,
   rating,
+  userRating,
+  onRate,
 }: TVShowCardProps) => {
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { toast } = useToast();
+  const isInList = isInWatchlist(id, "tv");
 
   const imageUrl = posterPath 
     ? `https://image.tmdb.org/t/p/w500${posterPath}`
     : "/placeholder.svg";
 
+  const handleWatchlistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleWatchlist(id, "tv");
+    toast({
+      title: isInList ? "Removed from watchlist" : "Added to watchlist",
+      description: isInList
+        ? `${name} removed from your watchlist`
+        : `${name} added to your watchlist`,
+    });
+  };
+
   const handleCardClick = () => {
     navigate(`/tv/${id}`);
+  };
+
+  const handleStarClick = (e: React.MouseEvent, starRating: number) => {
+    e.stopPropagation();
+    onRate?.(starRating);
   };
 
   return (
@@ -34,6 +61,15 @@ export const TVShowCard = ({
       className="group relative overflow-hidden bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-500 cursor-pointer hover:shadow-elevated hover:-translate-y-2"
       onClick={handleCardClick}
     >
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2 right-2 z-10 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+        onClick={handleWatchlistClick}
+      >
+        <Heart className={`w-4 h-4 ${isInList ? "fill-primary text-primary" : ""}`} />
+      </Button>
+
       <div className="aspect-[2/3] relative overflow-hidden">
         <img
           src={imageUrl}
@@ -59,6 +95,28 @@ export const TVShowCard = ({
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Star className="w-4 h-4 fill-accent text-accent" />
             <span className="font-medium">{rating.toFixed(1)}</span>
+          </div>
+
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onMouseEnter={() => setHoveredStar(star)}
+                onMouseLeave={() => setHoveredStar(null)}
+                onClick={(e) => handleStarClick(e, star)}
+                className="transition-all duration-200 hover:scale-125 active:scale-95"
+              >
+                <Star
+                  className={cn(
+                    "w-4 h-4 transition-all duration-200",
+                    (hoveredStar !== null && star <= hoveredStar) ||
+                    (hoveredStar === null && userRating && star <= userRating)
+                      ? "fill-accent text-accent drop-shadow-[0_0_8px_rgba(234,179,8,0.6)]"
+                      : "text-muted-foreground/50 hover:text-muted-foreground"
+                  )}
+                />
+              </button>
+            ))}
           </div>
         </div>
       </div>
