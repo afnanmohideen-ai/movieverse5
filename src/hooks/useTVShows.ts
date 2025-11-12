@@ -96,6 +96,11 @@ export interface TVShowDetails extends TVShow {
   status: string;
   tagline: string;
   type: string;
+  production_companies?: Array<{
+    id: number;
+    name: string;
+    logo_path: string | null;
+  }>;
 }
 
 export const useTVShowDetails = (tvShowId: number) => {
@@ -172,6 +177,36 @@ export const useTVShowReviews = (tvShowId: number) => {
       if (!res.ok) throw new Error("Failed to fetch TV show reviews");
       const data = await res.json();
       return data.results as TVShowReview[];
+    },
+    enabled: !!tvShowId,
+  });
+};
+
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+}
+
+export interface CrewMember {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+  profile_path: string | null;
+}
+
+export const useTVShowCredits = (tvShowId: number) => {
+  return useQuery<{ cast: CastMember[]; crew: CrewMember[] }>({
+    queryKey: ["tvShowCredits", tvShowId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${BASE_URL}/tv/${tvShowId}/credits?api_key=${API_KEY}&language=en-US`
+      );
+      if (!res.ok) throw new Error("Failed to fetch TV show credits");
+      return res.json();
     },
     enabled: !!tvShowId,
   });

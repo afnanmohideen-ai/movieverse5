@@ -22,6 +22,11 @@ export interface Movie {
   tagline?: string;
   imdb_id?: string;
   vote_count?: number;
+  production_companies?: Array<{
+    id: number;
+    name: string;
+    logo_path: string | null;
+  }>;
 }
 
 export interface WatchProvider {
@@ -176,6 +181,36 @@ export const useMovieVideos = (movieId: number) => {
         type: string;
         official: boolean;
       }>;
+    },
+    enabled: !!movieId,
+  });
+};
+
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+}
+
+export interface CrewMember {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+  profile_path: string | null;
+}
+
+export const useMovieCredits = (movieId: number) => {
+  return useQuery<{ cast: CastMember[]; crew: CrewMember[] }>({
+    queryKey: ["movieCredits", movieId],
+    queryFn: async () => {
+      const response = await fetch(
+        `${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}&language=en-US`
+      );
+      if (!response.ok) throw new Error("Failed to fetch movie credits");
+      return response.json();
     },
     enabled: !!movieId,
   });

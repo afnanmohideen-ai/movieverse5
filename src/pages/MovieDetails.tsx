@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Star, Clock, Heart, Play, User } from "lucide-react";
+import { ArrowLeft, Calendar, Star, Clock, Heart, Play, User, ExternalLink, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { useMovieDetails, useWatchProviders, useMovieVideos, useMovieReviews, getImageUrl } from "@/hooks/useMovies";
+import { useMovieDetails, useWatchProviders, useMovieVideos, useMovieReviews, useMovieCredits, getImageUrl } from "@/hooks/useMovies";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,10 +18,13 @@ const MovieDetails = () => {
   const { data: watchProvidersData } = useWatchProviders(movieId);
   const { data: videos } = useMovieVideos(movieId);
   const { data: reviews } = useMovieReviews(movieId);
+  const { data: credits } = useMovieCredits(movieId);
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
 
   const watchProviders = watchProvidersData?.results?.US;
   const trailers = videos?.filter(v => v.type === "Trailer" && v.site === "YouTube") || [];
+  const director = credits?.crew.find(c => c.job === "Director");
+  const topCast = credits?.cast.slice(0, 10) || [];
   const isInList = isInWatchlist(movieId);
 
   const handleWatchlistToggle = () => {
@@ -178,6 +181,59 @@ const MovieDetails = () => {
               <p className="text-muted-foreground leading-relaxed">{movie.overview}</p>
             </div>
 
+            {/* Production & Cast Info */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Production Companies */}
+              {movie.production_companies && movie.production_companies.length > 0 && (
+                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Building2 className="w-5 h-5 text-primary" />
+                    <h2 className="text-2xl font-bold">Studios</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {movie.production_companies.map((company) => (
+                      <div key={company.id} className="flex items-center gap-3">
+                        {company.logo_path ? (
+                          <img
+                            src={getImageUrl(company.logo_path)}
+                            alt={company.name}
+                            className="h-8 object-contain bg-white/10 rounded px-2 py-1"
+                          />
+                        ) : (
+                          <Building2 className="w-6 h-6 text-muted-foreground" />
+                        )}
+                        <span className="text-foreground">{company.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Director */}
+              {director && (
+                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl p-6">
+                  <h2 className="text-2xl font-bold mb-4">Director</h2>
+                  <div className="flex items-center gap-4">
+                    {director.profile_path ? (
+                      <img
+                        src={getImageUrl(director.profile_path)}
+                        alt={director.name}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                        <User className="w-8 h-8 text-primary" />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-lg">{director.name}</h3>
+                      <p className="text-sm text-muted-foreground">{director.job}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Streaming Providers */}
             {watchProviders && (
               <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl p-6">
@@ -276,12 +332,38 @@ const MovieDetails = () => {
           </div>
         </div>
 
+        {/* Cast Section */}
+        {topCast.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-6">Top Cast</h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              {topCast.map((actor) => (
+                <div key={actor.id} className="text-center">
+                  {actor.profile_path ? (
+                    <img
+                      src={getImageUrl(actor.profile_path)}
+                      alt={actor.name}
+                      className="w-full aspect-[2/3] object-cover rounded-2xl mb-3 shadow-lg"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[2/3] bg-card/50 rounded-2xl flex items-center justify-center mb-3">
+                      <User className="w-12 h-12 text-muted-foreground" />
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-sm">{actor.name}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{actor.character}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Trailers Section */}
         {trailers && trailers.length > 0 && (
           <div className="mb-12">
             <h2 className="text-3xl font-bold mb-6">Trailers & Videos</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {trailers.slice(0, 4).map((video) => (
+              {trailers.map((video) => (
                 <div key={video.id} className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden">
                   <div className="relative aspect-video">
                     <iframe
@@ -307,9 +389,9 @@ const MovieDetails = () => {
         {/* Reviews Section */}
         {reviews && reviews.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-3xl font-bold mb-6">Reviews</h2>
+            <h2 className="text-3xl font-bold mb-6">User Reviews ({reviews.length})</h2>
             <div className="space-y-6">
-              {reviews.slice(0, 5).map((review) => (
+              {reviews.map((review) => (
                 <Card key={review.id} className="bg-card/50 backdrop-blur-xl border-border/50">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4 mb-4">
