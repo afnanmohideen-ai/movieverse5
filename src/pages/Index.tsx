@@ -7,6 +7,7 @@ import { TVShowCard } from "@/components/TVShowCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Navbar } from "@/components/Navbar";
 import { FilterBar } from "@/components/FilterBar";
+import { AdvancedFilters, FilterOptions } from "@/components/AdvancedFilters";
 import { MoviePagination } from "@/components/MoviePagination";
 import { 
   usePopularMovies, 
@@ -38,6 +39,14 @@ const Index = () => {
   const [searchPage, setSearchPage] = useState(1);
   const [filteredPage, setFilteredPage] = useState(1);
   const { toast } = useToast();
+  const currentYear = new Date().getFullYear();
+  const [advancedFilters, setAdvancedFilters] = useState<FilterOptions>({
+    providers: [],
+    genres: [],
+    yearRange: [1900, currentYear],
+    ratingRange: [0, 10],
+    priceTypes: [],
+  });
 
   const hasFilters = selectedGenre || selectedYear;
 
@@ -139,19 +148,26 @@ const Index = () => {
           {/* MOVIES TAB */}
           <TabsContent value="movies" className="space-y-20">
         {!searchQuery && (
-          <FilterBar
-            selectedGenre={selectedGenre}
-            selectedYear={selectedYear}
-            onGenreChange={(genre) => {
-              setSelectedGenre(genre);
-              setFilteredPage(1);
-            }}
-            onYearChange={(year) => {
-              setSelectedYear(year);
-              setFilteredPage(1);
-            }}
-            onClearFilters={handleClearFilters}
-          />
+          <div className="flex gap-4 mb-8">
+            <FilterBar
+              selectedGenre={selectedGenre}
+              selectedYear={selectedYear}
+              onGenreChange={(genre) => {
+                setSelectedGenre(genre);
+                setFilteredPage(1);
+              }}
+              onYearChange={(year) => {
+                setSelectedYear(year);
+                setFilteredPage(1);
+              }}
+              onClearFilters={handleClearFilters}
+            />
+            <AdvancedFilters
+              filters={advancedFilters}
+              onFiltersChange={setAdvancedFilters}
+              contentType="movie"
+            />
+          </div>
         )}
 
         {searchQuery ? (
