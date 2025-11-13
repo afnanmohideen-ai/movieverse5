@@ -9,6 +9,7 @@ import TVShowDetails from "./pages/TVShowDetails";
 import Watchlist from "./pages/Watchlist";
 import NewReleases from "./pages/NewReleases";
 import ProviderBrowse from "./pages/ProviderBrowse";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/new" element={<NewReleases />} />
           <Route path="/provider/:provider" element={<ProviderBrowse />} />
+          <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
