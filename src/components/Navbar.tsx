@@ -1,6 +1,12 @@
-import { Film, Home, Heart } from "lucide-react";
+import { Film, Home, Heart, Plus, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -38,6 +44,55 @@ export const Navbar = () => {
               <Home className="w-4 h-4" />
               <span className="hidden sm:inline">Home</span>
             </Button>
+
+            <Button
+              onClick={() => navigate("/new")}
+              variant="ghost"
+              size="sm"
+              className="gap-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">New</span>
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="hidden sm:inline">Providers</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate("/provider/netflix")}>
+                  🎬 Netflix
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/provider/disney")}>
+                  ✨ Disney+
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/provider/prime")}>
+                  📦 Prime Video
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/provider/hulu")}>
+                  🟢 Hulu
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/provider/hbo")}>
+                  🎭 HBO Max
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/provider/apple")}>
+                  🍎 Apple TV+
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/provider/paramount")}>
+                  ⭐ Paramount+
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/provider/peacock")}>
+                  🦚 Peacock
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <Button
               onClick={() => navigate("/watchlist")}
