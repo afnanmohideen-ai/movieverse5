@@ -17,7 +17,7 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '',
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -26,11 +26,36 @@ serve(async (req) => {
     );
 
     const { data: { user } } = await supabaseClient.auth.getUser();
-    
+
+    // If not authenticated, return deterministic generic picks (no user data)
     if (!user) {
+      const today = new Date().toISOString().split('T')[0];
+      const seed = today.split('-').join('');
+
+      const movieResponse = await fetch(
+        `${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&vote_count.gte=1000&page=${parseInt(seed) % 5 + 1}`
+      );
+      const movieData = await movieResponse.json();
+
+      const tvResponse = await fetch(
+        `${TMDB_BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&sort_by=popularity.desc&vote_count.gte=500&page=${parseInt(seed) % 5 + 1}`
+      );
+      const tvData = await tvResponse.json();
+
+      const movieIndex = parseInt(seed.slice(-2)) % (movieData.results?.length || 1);
+      const tvIndex = parseInt(seed.slice(-3, -1)) % (tvData.results?.length || 1);
+
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          movie: movieData.results?.[movieIndex] || movieData.results?.[0] || null,
+          tvShow: tvData.results?.[tvIndex] || tvData.results?.[0] || null,
+          userPreferences: {
+            favoriteGenres: [],
+            watchlistCount: 0,
+            ratingsCount: 0,
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
