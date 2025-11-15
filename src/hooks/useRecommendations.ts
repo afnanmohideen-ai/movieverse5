@@ -11,7 +11,7 @@ export interface Recommendation {
   };
 }
 
-export const useRecommendations = () => {
+export const useRecommendations = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ["recommendations", new Date().toISOString().split('T')[0]],
     queryFn: async () => {
@@ -20,6 +20,7 @@ export const useRecommendations = () => {
       if (error) throw error;
       return data as Recommendation;
     },
+    enabled, // Only run when enabled (user is authenticated)
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
   });
 };

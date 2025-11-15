@@ -64,7 +64,7 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: recommendations } = useRecommendations();
+  const { data: recommendations } = useRecommendations(isAuthenticated);
 
   const hasFilters = selectedGenre || selectedYear;
 
