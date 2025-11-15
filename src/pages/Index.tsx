@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Film } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovieCard } from "@/components/MovieCard";
@@ -9,6 +9,9 @@ import { Navbar } from "@/components/Navbar";
 import { FilterBar } from "@/components/FilterBar";
 import { AdvancedFilters, FilterOptions } from "@/components/AdvancedFilters";
 import { MoviePagination } from "@/components/MoviePagination";
+import { TodaysRecommendation } from "@/components/TodaysRecommendation";
+import { useRecommendations } from "@/hooks/useRecommendations";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   usePopularMovies, 
   useTrendingMovies, 
@@ -47,6 +50,21 @@ const Index = () => {
     ratingRange: [0, 10],
     priceTypes: [],
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const { data: recommendations } = useRecommendations();
 
   const hasFilters = selectedGenre || selectedYear;
 
@@ -136,6 +154,24 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Personalized Recommendations */}
+      {isAuthenticated && recommendations && (
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid md:grid-cols-2 gap-6">
+            <TodaysRecommendation
+              title="Today's Movie Pick"
+              item={recommendations.movie}
+              type="movie"
+            />
+            <TodaysRecommendation
+              title="Today's TV Show Pick"
+              item={recommendations.tvShow}
+              type="tv"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Content Section with Tabs */}
       <main className="container mx-auto px-4 py-16">

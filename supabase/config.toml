@@ -1,1 +1,4 @@
 project_id = "prumobukxpnvwirvyjzf"
+
+[functions.get-recommendations]
+verify_jwt = true
