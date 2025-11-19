@@ -64,7 +64,7 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: recommendations } = useRecommendations(isAuthenticated);
+  const { data: recommendations } = useRecommendations();
 
   const hasFilters = selectedGenre || selectedYear;
 
@@ -156,16 +156,16 @@ const Index = () => {
       </div>
 
       {/* Personalized Recommendations */}
-      {isAuthenticated && recommendations && (
+      {recommendations && (
         <div className="container mx-auto px-4 py-12">
           <div className="grid md:grid-cols-2 gap-6">
             <TodaysRecommendation
-              title="Today's Movie Pick"
+              title={isAuthenticated ? "Today's Movie Pick For You" : "Today's Featured Movie"}
               item={recommendations.movie}
               type="movie"
             />
             <TodaysRecommendation
-              title="Today's TV Show Pick"
+              title={isAuthenticated ? "Today's TV Show Pick For You" : "Today's Featured TV Show"}
               item={recommendations.tvShow}
               type="tv"
             />
