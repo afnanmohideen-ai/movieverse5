@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Film, Tv, Star, LogOut } from "lucide-react";
 import { useGenres } from "@/hooks/useMovies";
-import { useWatchlist } from "@/hooks/useWatchlist";
+import { useSupabaseWatchlist } from "@/hooks/useSupabaseWatchlist";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function Profile() {
   const [favoriteGenres, setFavoriteGenres] = useState<number[]>([]);
   const { data: genresData } = useGenres();
   const genres = genresData?.genres || [];
-  const { watchlist } = useWatchlist();
+  const { watchlist } = useSupabaseWatchlist();
 
   useEffect(() => {
     checkUser();

@@ -1,4 +1,4 @@
-import { useWatchlist } from "@/hooks/useWatchlist";
+import { useSupabaseWatchlist } from "@/hooks/useSupabaseWatchlist";
 import { useMovieDetails, getImageUrl } from "@/hooks/useMovies";
 import { useTVShowDetails } from "@/hooks/useTVShows";
 import { Navbar } from "@/components/Navbar";
@@ -55,7 +55,7 @@ const WatchlistTVShowCard = ({ tvShowId }: { tvShowId: number }) => {
 };
 
 const Watchlist = () => {
-  const { watchlist } = useWatchlist();
+  const { watchlist } = useSupabaseWatchlist();
 
   const movieItems = watchlist.filter((item) => item.type === "movie");
   const tvItems = watchlist.filter((item) => item.type === "tv");
