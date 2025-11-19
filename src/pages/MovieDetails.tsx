@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { useMovieDetails, useWatchProviders, useMovieVideos, useMovieReviews, useMovieCredits, getImageUrl } from "@/hooks/useMovies";
-import { useWatchlist } from "@/hooks/useWatchlist";
+import { useSupabaseWatchlist } from "@/hooks/useSupabaseWatchlist";
 import { useToast } from "@/hooks/use-toast";
 
 const MovieDetails = () => {
@@ -19,7 +19,7 @@ const MovieDetails = () => {
   const { data: videos } = useMovieVideos(movieId);
   const { data: reviews } = useMovieReviews(movieId);
   const { data: credits } = useMovieCredits(movieId);
-  const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { isInWatchlist, toggleWatchlist } = useSupabaseWatchlist();
 
   const watchProviders = watchProvidersData?.results?.US;
   const trailers = videos?.filter(v => v.type === "Trailer" && v.site === "YouTube") || [];

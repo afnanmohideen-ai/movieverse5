@@ -110,21 +110,28 @@ serve(async (req) => {
     ) || [];
 
     // Select today's recommendations (deterministic based on date)
-    const movieIndex = parseInt(seed.slice(-2)) % (filteredMovies.length || 1);
-    const tvIndex = parseInt(seed.slice(-3, -1)) % (filteredTVShows.length || 1);
+    const movieIndex = parseInt(seed.slice(-2)) % (filteredMovies.length || movieData.results?.length || 1);
+    const tvIndex = parseInt(seed.slice(-3, -1)) % (filteredTVShows.length || tvData.results?.length || 1);
 
-    const todaysMovie = filteredMovies[movieIndex] || movieData.results?.[0];
-    const todaysTVShow = filteredTVShows[tvIndex] || tvData.results?.[0];
+    const selectedMovie = filteredMovies[movieIndex] || movieData.results?.[movieIndex] || movieData.results?.[0] || null;
+    const selectedTV = filteredTVShows[tvIndex] || tvData.results?.[tvIndex] || tvData.results?.[0] || null;
+
+    console.log('Selected recommendations:', {
+      movieTitle: selectedMovie?.title,
+      tvTitle: selectedTV?.name,
+      filteredMoviesCount: filteredMovies.length,
+      filteredTVCount: filteredTVShows.length
+    });
 
     return new Response(
       JSON.stringify({
-        movie: todaysMovie,
-        tvShow: todaysTVShow,
+        movie: selectedMovie,
+        tvShow: selectedTV,
         userPreferences: {
           favoriteGenres: genreIds,
           watchlistCount: watchlist?.length || 0,
-          ratingsCount: ratings?.length || 0
-        }
+          ratingsCount: ratings?.length || 0,
+        },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

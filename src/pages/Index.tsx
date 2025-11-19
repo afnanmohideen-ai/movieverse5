@@ -11,6 +11,7 @@ import { AdvancedFilters, FilterOptions } from "@/components/AdvancedFilters";
 import { MoviePagination } from "@/components/MoviePagination";
 import { TodaysRecommendation } from "@/components/TodaysRecommendation";
 import { useRecommendations } from "@/hooks/useRecommendations";
+import { useSupabaseRatings } from "@/hooks/useSupabaseRatings";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   usePopularMovies, 
@@ -31,8 +32,7 @@ import heroImage from "@/assets/hero-cinema.jpg";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [userRatings, setUserRatings] = useState<Record<number, number>>({});
-  const [tvUserRatings, setTvUserRatings] = useState<Record<number, number>>({});
+  const { getRating, setRating } = useSupabaseRatings();
   const [selectedGenre, setSelectedGenre] = useState<number>();
   const [selectedYear, setSelectedYear] = useState<number>();
   const [activeTab, setActiveTab] = useState("movies");
@@ -86,19 +86,11 @@ const Index = () => {
   const { data: searchTVResults, isLoading: isSearchingTV } = useSearchTVShows(searchQuery, searchPage);
 
   const handleRate = (movieId: number, rating: number) => {
-    setUserRatings((prev) => ({ ...prev, [movieId]: rating }));
-    toast({
-      title: "Rating saved!",
-      description: `You rated this movie ${rating} stars`,
-    });
+    setRating(movieId, "movie", rating);
   };
 
   const handleRateTV = (tvShowId: number, rating: number) => {
-    setTvUserRatings((prev) => ({ ...prev, [tvShowId]: rating }));
-    toast({
-      title: "Rating saved!",
-      description: `You rated this TV show ${rating} stars`,
-    });
+    setRating(tvShowId, "tv", rating);
   };
 
   const handleClearFilters = () => {
@@ -231,7 +223,7 @@ const Index = () => {
                     posterPath={getImageUrl(movie.poster_path)}
                     releaseDate={movie.release_date}
                     rating={movie.vote_average}
-                    userRating={userRatings[movie.id]}
+                    userRating={getRating(movie.id, "movie")}
                     onRate={(rating) => handleRate(movie.id, rating)}
                   />
                 ))}
@@ -276,7 +268,7 @@ const Index = () => {
                       posterPath={getImageUrl(movie.poster_path)}
                       releaseDate={movie.release_date}
                       rating={movie.vote_average}
-                      userRating={userRatings[movie.id]}
+                      userRating={getRating(movie.id, "movie")}
                       onRate={(rating) => handleRate(movie.id, rating)}
                     />
                   ))}
@@ -323,7 +315,7 @@ const Index = () => {
                       posterPath={getImageUrl(movie.poster_path)}
                       releaseDate={movie.release_date}
                       rating={movie.vote_average}
-                      userRating={userRatings[movie.id]}
+                      userRating={getRating(movie.id, "movie")}
                       onRate={(rating) => handleRate(movie.id, rating)}
                     />
                   ))}
@@ -368,7 +360,7 @@ const Index = () => {
                       posterPath={getImageUrl(movie.poster_path)}
                       releaseDate={movie.release_date}
                       rating={movie.vote_average}
-                      userRating={userRatings[movie.id]}
+                      userRating={getRating(movie.id, "movie")}
                       onRate={(rating) => handleRate(movie.id, rating)}
                     />
                   ))}
@@ -414,7 +406,7 @@ const Index = () => {
                         posterPath={getImageUrl(movie.poster_path)}
                         releaseDate={movie.release_date}
                         rating={movie.vote_average}
-                        userRating={userRatings[movie.id]}
+                        userRating={getRating(movie.id, "movie")}
                         onRate={(rating) => handleRate(movie.id, rating)}
                       />
                     ))}
@@ -465,7 +457,7 @@ const Index = () => {
                         posterPath={show.poster_path}
                         firstAirDate={show.first_air_date}
                         rating={show.vote_average}
-                        userRating={tvUserRatings[show.id]}
+                        userRating={getRating(show.id, "tv")}
                         onRate={(rating) => handleRateTV(show.id, rating)}
                       />
                     ))}
@@ -499,7 +491,7 @@ const Index = () => {
                             posterPath={show.poster_path}
                             firstAirDate={show.first_air_date}
                             rating={show.vote_average}
-                            userRating={tvUserRatings[show.id]}
+                            userRating={getRating(show.id, "tv")}
                             onRate={(rating) => handleRateTV(show.id, rating)}
                           />
                         ))}
@@ -541,7 +533,7 @@ const Index = () => {
                             posterPath={show.poster_path}
                             firstAirDate={show.first_air_date}
                             rating={show.vote_average}
-                            userRating={tvUserRatings[show.id]}
+                            userRating={getRating(show.id, "tv")}
                             onRate={(rating) => handleRateTV(show.id, rating)}
                           />
                         ))}
@@ -583,7 +575,7 @@ const Index = () => {
                             posterPath={show.poster_path}
                             firstAirDate={show.first_air_date}
                             rating={show.vote_average}
-                            userRating={tvUserRatings[show.id]}
+                            userRating={getRating(show.id, "tv")}
                             onRate={(rating) => handleRateTV(show.id, rating)}
                           />
                         ))}

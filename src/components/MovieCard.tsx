@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useWatchlist } from "@/hooks/useWatchlist";
+import { useSupabaseWatchlist } from "@/hooks/useSupabaseWatchlist";
 import { useToast } from "@/hooks/use-toast";
 
 interface MovieCardProps {
@@ -28,7 +28,7 @@ export const MovieCard = ({
 }: MovieCardProps) => {
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
   const navigate = useNavigate();
-  const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { isInWatchlist, toggleWatchlist } = useSupabaseWatchlist();
   const { toast } = useToast();
   const isInList = isInWatchlist(id);
 
